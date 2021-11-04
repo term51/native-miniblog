@@ -1,1 +1,1 @@
-# native-miniblog
+# React Native miniblog app 

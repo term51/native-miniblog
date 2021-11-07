@@ -1,29 +1,46 @@
-import React from "react";
-import { View, StyleSheet, Text, Button, FlatList } from "react-native";
-import { DATA } from "../data";
+import React, { useEffect } from "react";
 import Post from "../components/Post";
+import PostList from "../components/PostList";
+import { useDispatch, useSelector } from "react-redux";
+import { loadPosts } from "../store/actions/post";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { THEME } from "../theme";
 
 // В пропсы попадает объект navigation, с методами навигации
 const MainScreen = ({ navigation }) => {
-  const goToPost = () => {
-    // Перенаправляет на экран, 1й-параметр name из PostStack.Screen, AppNavigation. 2й- параметры
-    navigation.navigate("Post");
+  const dispatch = useDispatch();
+  const allPosts = useSelector((state) => state.post.allPosts);
+  const loading = useSelector((state) => state.post.loading);
+
+  useEffect(() => {
+    dispatch(loadPosts());
+  }, [dispatch]);
+
+  const handleOpenPost = (post) => {
+    // Перенаправляет на экран, 1й-параметр name из PostStack.Screen, AppNavigation. 2й- props
+    navigation.navigate("Post", {
+      postId: post.id,
+      date: post.date,
+      booked: post.booked,
+    });
   };
 
-  return (
-    <View style={styles.wrapper}>
-      <FlatList
-        data={DATA}
-        keyExtractor={(post) => post.id.toString()} // откуда брать уникальные значения key
-        renderItem={({ item }) => <Post post={item} />}
-      />
-    </View>
-  );
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size={"large"} color={THEME.MAIN_COLOR} />
+      </View>
+    );
+  }
+
+  return <PostList data={allPosts} onOpen={handleOpenPost} />;
 };
 
 const styles = StyleSheet.create({
-  wrapper: {
-    padding: 10,
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
